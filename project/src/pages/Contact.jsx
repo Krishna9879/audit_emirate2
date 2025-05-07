@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaWhatsapp, FaLinkedin } from 'react-icons/fa';
+import { useState, useRef } from 'react';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const contactInfo = [
@@ -39,9 +41,45 @@ const Contact = () => {
     {
       icon: <FaLinkedin className="text-4xl text-blue-600" />,
       title: "LinkedIn",
-      href: "https://www.linkedin.com/company/emirates-audit-group", 
+      href: "https://www.linkedin.com/company/emirates-audit-group",
     },
   ];
+
+  // State for form feedback
+  const [status, setStatus] = useState({ message: '', type: '' });
+  const form = useRef();
+
+  // Handle form submission
+  const sendEmail = (e) => {
+    e.preventDefault();
+    setStatus({ message: '', type: '' });
+
+    emailjs
+      .sendForm(
+        'service_4na8cob', // Replace with your Service ID
+        'template_caz1a9p', // Replace with your Template ID
+        form.current,
+        {
+          publicKey: 'UOrdbW_sYZn6BLQcN', // Replace with your Public Key
+        }
+      )
+      .then(
+        () => {
+          setStatus({
+            message: 'Thank you for your inquiry. Our team will reach out to you shortly.',
+            type: 'success',
+          });
+          form.current.reset();
+        },
+        (error) => {
+          setStatus({
+            message: 'An error occurred. Please try again or contact us directly.',
+            type: 'error',
+          });
+          console.error('EmailJS error:', error.text);
+        }
+      );
+  };
 
   return (
     <div className="pt-20 bg-white">
@@ -150,20 +188,24 @@ const Contact = () => {
               transition={{ duration: 0.8 }}
               className="bg-white p-8 rounded-xl shadow-lg"
             >
-              <form className="space-y-6">
+              <form ref={form} onSubmit={sendEmail} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <motion.div whileHover={{ scale: 1.02 }}>
                     <label className="block text-gray-700 mb-2">First Name</label>
                     <input
                       type="text"
+                      name="first_name"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      required
                     />
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.02 }}>
                     <label className="block text-gray-700 mb-2">Last Name</label>
                     <input
                       type="text"
+                      name="last_name"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      required
                     />
                   </motion.div>
                 </div>
@@ -171,36 +213,59 @@ const Contact = () => {
                   <label className="block text-gray-700 mb-2">Email</label>
                   <input
                     type="email"
+                    name="email"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    required
                   />
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.02 }}>
                   <label className="block text-gray-700 mb-2">Phone</label>
                   <input
                     type="tel"
+                    name="phone"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   />
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.02 }}>
                   <label className="block text-gray-700 mb-2">Service Interest</label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                  <select
+                    name="service_interest"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    required
+                  >
                     <option value="">Select a service</option>
-                    <option value="internal-audit">Internal Audit</option>
-                    <option value="risk-assessment">Risk Assessment</option>
-                    <option value="compliance-audit">Compliance Audit</option>
-                    <option value="it-audit">IT Audit</option>
+                    <option value="Internal Audit">Internal Audit</option>
+                    <option value="Risk Assessment">Risk Assessment</option>
+                    <option value="Compliance Audit">Compliance Audit</option>
+                    <option value="IT Audit">IT Audit</option>
                   </select>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.02 }}>
                   <label className="block text-gray-700 mb-2">Message</label>
                   <textarea
+                    name="message"
                     rows="4"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    required
                   ></textarea>
                 </motion.div>
+                {status.message && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={`p-4 rounded-lg ${
+                      status.type === 'success'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {status.message}
+                  </motion.div>
+                )}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white py-4 rounded-lg font-semibold transition-all duration-300 transform hover:shadow-xl"
                 >
                   Send Message
